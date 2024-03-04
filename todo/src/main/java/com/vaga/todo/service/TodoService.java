@@ -7,6 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.vaga.todo.dto.TodoDto;
+import com.vaga.todo.mapper.TodoConvertDtoEntityMapper;
+import com.vaga.todo.mapper.UserConvertDtoEntityMapper;
 import com.vaga.todo.model.TodoModel;
 import com.vaga.todo.repository.TodoRepository;
 
@@ -16,6 +18,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class TodoService {
     private TodoRepository todoRepository;
+    private TodoConvertDtoEntityMapper todoConvertDtoEntityMapper;
 
     public TodoService(TodoRepository todoRepository) {
         this.todoRepository = todoRepository;
@@ -23,7 +26,7 @@ public class TodoService {
 
     @Transactional
     public List<TodoDto> create(TodoDto todoDto){
-        todoRepository.save(convertDtoEntity(todoDto));
+        todoRepository.save(convertDtoEntityMapper.convertDtoEntity(todoDto));
         return list();
     }
 
@@ -48,13 +51,13 @@ public class TodoService {
         }
     }
 
-    private TodoModel convertDtoEntity(TodoDto todoDto){
-        TodoModel todoModel = new TodoModel();
-        todoModel.setId(todoDto.getId());
-        todoModel.setName(todoDto.getName());
-        todoModel.setDescription(todoDto.getDescription());
-        todoModel.setAccomplished(todoDto.isAccomplished());
-        todoModel.setPriority(todoDto.getPriority());
-        return todoModel;
-    }
+    // private TodoModel convertDtoEntity(TodoDto todoDto){
+    //     TodoModel todoModel = new TodoModel();
+    //     todoModel.setId(todoDto.getId());
+    //     todoModel.setName(todoDto.getName());
+    //     todoModel.setDescription(todoDto.getDescription());
+    //     todoModel.setAccomplished(todoDto.isAccomplished());
+    //     todoModel.setPriority(todoDto.getPriority());
+    //     return todoModel;
+    // }
 }

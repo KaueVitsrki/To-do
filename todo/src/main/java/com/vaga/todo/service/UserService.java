@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.vaga.todo.dto.UserDto;
-import com.vaga.todo.mapper.ConvertDtoEntityMapper;
-import com.vaga.todo.mapper.ConvertEntityDtoMapper;
+import com.vaga.todo.mapper.UserConvertDtoEntityMapper;
+import com.vaga.todo.mapper.UserConvertEntityDtoMapper;
 import com.vaga.todo.model.UserModel;
 import com.vaga.todo.repository.UserRepository;
 
@@ -16,14 +16,14 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
     private UserRepository userRepository;
-    private ConvertEntityDtoMapper convertEntityDtoMapper;
-    private ConvertDtoEntityMapper convertDtoEntityMapper;
+    private UserConvertEntityDtoMapper convertEntityDtoMapper;
+    private UserConvertDtoEntityMapper convertDtoEntityMapper;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public UserService(ConvertEntityDtoMapper convertEntityDtoMapper) {
+    public UserService(UserConvertEntityDtoMapper convertEntityDtoMapper) {
         this.convertEntityDtoMapper = convertEntityDtoMapper;
     }
 
