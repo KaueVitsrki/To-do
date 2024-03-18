@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.vaga.todo.model.TodoModel;
 import com.vaga.todo.model.UserModel;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +15,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor @NoArgsConstructor
 public class UserDto {
     private UUID id;
-    private Email email;
+    private String email;
+    private String password;
     private List<TodoModel> todoModel;
 
     public UserDto(UserModel userModel) {
         this.id = userModel.getId();
         this.email = userModel.getEmail();
+        this.password = userModel.getPassword();
         this.todoModel = userModel.getTodoModel();
     }
     

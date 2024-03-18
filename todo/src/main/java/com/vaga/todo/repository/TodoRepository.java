@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.vaga.todo.model.TodoModel;
 
 public interface TodoRepository extends JpaRepository<TodoModel, UUID>{
+    boolean existsByName(String name);
     
 }

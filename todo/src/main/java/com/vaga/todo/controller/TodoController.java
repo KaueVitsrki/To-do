@@ -3,7 +3,7 @@ package com.vaga.todo.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,33 +22,30 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/todos")
 public class TodoController {
+    @Autowired
     private TodoService todoService;
-
-    public TodoController(TodoService todoService) {
-        this.todoService = todoService;
-    }
     
-    @PostMapping
-    public ResponseEntity<List<TodoDto>> create(@RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> create = todoService.create(todoDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(create);
+    @PostMapping("/users/{idUser}")
+    public ResponseEntity<List<TodoDto>> createTodo(@PathVariable UUID idUser, @RequestBody @Valid TodoDto todoDto){
+        List<TodoDto> create = todoService.createTodo(idUser, todoDto);
+        return ResponseEntity.ok(create);
     }
 
-    @PutMapping
-    public ResponseEntity<List<TodoDto>> update(@RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> update = todoService.update(todoDto);
+    @PutMapping("/users/{idUser}/todos/{idTodo}")
+    public ResponseEntity<List<TodoDto>> updateTodo(@PathVariable UUID idUser, @PathVariable UUID idTodo, @RequestBody @Valid TodoDto todoDto){
+        List<TodoDto> update = todoService.updateTodo(idUser, idTodo, todoDto);
         return ResponseEntity.ok(update);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TodoDto>> list(){
-        List<TodoDto> list = todoService.list();
+    @GetMapping("/users/{idUser}")
+    public ResponseEntity<List<TodoDto>> listTodoUser(@PathVariable UUID idUser){
+        List<TodoDto> list = todoService.listTodoUser(idUser);
         return ResponseEntity.ok(list);
     }   
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable @Valid UUID id){
-        todoService.delete(id);
+    @DeleteMapping("/users/{idUser}/todos/{idTodo}")
+    public ResponseEntity deleteTodoUser(@PathVariable UUID idUser, @PathVariable UUID idTodo){
+        todoService.deleteTodoUser(idUser, idTodo);
         return ResponseEntity.noContent().build();
     }
 }
