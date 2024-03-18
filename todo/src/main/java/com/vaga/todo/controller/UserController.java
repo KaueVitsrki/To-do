@@ -26,15 +26,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<UserDto>> listUser(){ // Alterar para somente o usuario ver seus parâmetros
         List<UserDto> list = userService.listUser();
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> listUserById(@Valid @PathVariable UUID id){
-        UserDto listUserById = userService.listUserId(id);
+    @GetMapping
+    public ResponseEntity<UserDto> listUserById(){
+        UserDto listUserById = userService.listUserId();
         return ResponseEntity.ok(listUserById);
     }
 
@@ -44,15 +44,15 @@ public class UserController {
         return new ResponseEntity<UserDto>(userCreate, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{idUser}")
-    public ResponseEntity deleteUser(@PathVariable UUID idUser){
-        userService.deleteUser(idUser);
+    @DeleteMapping
+    public ResponseEntity deleteUser(@RequestBody @Valid UserDto userDto){
+        userService.deleteUser(userDto);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{idUser}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable UUID idUser, @RequestBody @Valid UserDto userDto){
-        UserDto userUpdate = userService.updateUser(idUser, userDto);
+    @PutMapping
+    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto userDto){
+        UserDto userUpdate = userService.updateUser(userDto);
         return ResponseEntity.ok(userUpdate);       
     }
 }
