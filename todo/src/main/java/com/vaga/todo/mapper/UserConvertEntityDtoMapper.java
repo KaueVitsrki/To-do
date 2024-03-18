@@ -6,6 +6,6 @@ import com.vaga.todo.dto.UserDto;
 import com.vaga.todo.model.UserModel;
 
 @Mapper(componentModel = "spring")
-public interface ConvertDtoEntityMapper {
-    UserModel convertDtoEntity(UserDto userDto);
+public interface UserConvertEntityDtoMapper {
+    UserDto convertEntityDto(UserModel userModel);
 }
