@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,14 +22,20 @@ public class SecurityFilter extends OncePerRequestFilter{
     private TokenService tokenService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         var token = this.recoverToken(request);
         if(token != null){
+            if(tokenBlacklist.isBlacklisted(token)){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            } 
             var email = tokenService.validateToken(token);
-            UserDetails user = userRepository.findByEmail(email);
+            var user = userRepository.findByEmail(email);
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -43,4 +48,5 @@ public class SecurityFilter extends OncePerRequestFilter{
         if(authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
+
 }

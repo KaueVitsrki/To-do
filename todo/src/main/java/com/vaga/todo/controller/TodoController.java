@@ -25,27 +25,27 @@ public class TodoController {
     @Autowired
     private TodoService todoService;
     
-    @PostMapping("/users/{idUser}")
-    public ResponseEntity<List<TodoDto>> createTodo(@PathVariable UUID idUser, @RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> create = todoService.createTodo(idUser, todoDto);
+    @PostMapping
+    public ResponseEntity<List<TodoDto>> createTodo(@RequestBody @Valid TodoDto todoDto){
+        List<TodoDto> create = todoService.createTodo(todoDto);
         return ResponseEntity.ok(create);
     }
 
-    @PutMapping("/users/{idUser}/todos/{idTodo}")
-    public ResponseEntity<List<TodoDto>> updateTodo(@PathVariable UUID idUser, @PathVariable UUID idTodo, @RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> update = todoService.updateTodo(idUser, idTodo, todoDto);
+    @PutMapping("/{idTodo}")
+    public ResponseEntity<List<TodoDto>> updateTodo(@PathVariable UUID idTodo, @RequestBody @Valid TodoDto todoDto){
+        List<TodoDto> update = todoService.updateTodo(idTodo, todoDto);
         return ResponseEntity.ok(update);
     }
 
-    @GetMapping("/users/{idUser}")
-    public ResponseEntity<List<TodoDto>> listTodoUser(@PathVariable UUID idUser){
-        List<TodoDto> list = todoService.listTodoUser(idUser);
+    @GetMapping
+    public ResponseEntity<List<TodoDto>> listTodoUser(){
+        List<TodoDto> list = todoService.listTodoUser();
         return ResponseEntity.ok(list);
     }   
 
-    @DeleteMapping("/users/{idUser}/todos/{idTodo}")
-    public ResponseEntity deleteTodoUser(@PathVariable UUID idUser, @PathVariable UUID idTodo){
-        todoService.deleteTodoUser(idUser, idTodo);
+    @DeleteMapping("/{idTodo}")
+    public ResponseEntity deleteTodoUser(@PathVariable UUID idTodo){
+        todoService.deleteTodoUser(idTodo);
         return ResponseEntity.noContent().build();
     }
 }

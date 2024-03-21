@@ -2,15 +2,17 @@ package com.vaga.todo.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vaga.todo.dto.UserDto;
 import com.vaga.todo.exception.EmailAlreadyExistsException;
+import com.vaga.todo.exception.UnauthorizedAccessException;
 import com.vaga.todo.mapper.UserConvertDtoEntityMapper;
 import com.vaga.todo.mapper.UserConvertEntityDtoMapper;
 import com.vaga.todo.model.UserModel;
@@ -28,6 +30,8 @@ public class UserService {
     @Autowired
     private UserConvertDtoEntityMapper convertDtoEntityMapper;
 
+    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Transactional
     public UserDto createUser(UserDto userDto){         
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -44,11 +48,18 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(UUID id){
-        if(userRepository.existsById(id)){
-            userRepository.deleteById(id);
+    public void deleteUser(UserDto userDto){
+        if(!isUserLoggedIn()){
+            throw new UnauthorizedAccessException("Usuário não autenticado");
+        }
+
+        boolean passwordMatch = matches(userDto.getPassword(), userLogged().getPassword());
+        boolean emailMatch = userDto.getEmail().equals(userLogged().getEmail());
+
+        if(userRepository.existsById(userLogged().getId()) && passwordMatch && emailMatch){
+            userRepository.deleteById(userLogged().getId());
         }else {
-            throw new EntityNotFoundException("Não foi possível excluir a conta! O usuário não foi cadastrado.");
+            throw new EntityNotFoundException("Não foi possível excluir a conta!");
         } 
     }
 
@@ -57,28 +68,52 @@ public class UserService {
         return UserDto.convert(list);
     }
 
-    public UserDto listUserId(UUID id){
-        if(userRepository.existsById(id)){
-            UserModel user = userRepository.findById(id).get();
+    public UserDto listUserId(){
+        if(!isUserLoggedIn()){
+            throw new UnauthorizedAccessException("Usuário não autenticado");
+        }
+
+        if(userRepository.existsById(userLogged().getId())){
+            UserModel user = userRepository.findById(userLogged().getId()).get();
             return convertEntityDtoMapper.convertEntityDto(user);
         }else {
             throw new EntityNotFoundException("Não foi possível listar o usuário! O usuário não está cadastrado.");
         }
     }
 
-@Transactional
-    public UserDto updateUser(UUID idUser, UserDto userDto){
-        UserModel user = userRepository.findById(idUser)
-        .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com o ID: " + idUser));
-    
-        if(userRepository.existsByEmail(userDto.getEmail()) && !userDto.getEmail().equals(user.getEmail())){
+    @Transactional
+    public UserDto updateUser(UserDto userDto){
+        if(!isUserLoggedIn()){
+            throw new UnauthorizedAccessException("Usuário não autenticado");
+        }
+
+        if(userRepository.existsByEmail(userDto.getEmail()) && !userDto.getEmail().equals(userLogged().getEmail())){
             throw new EmailAlreadyExistsException("Não foi possivel realizar a troca de Email! Este Email já foi cadastrado");
         }
 
+        UserModel userLogged = userLogged();
         String password = new BCryptPasswordEncoder().encode(userDto.getPassword());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(password);
 
-        return convertEntityDtoMapper.convertEntityDto(user);
+        userLogged.setEmail(userDto.getEmail());
+        userLogged.setPassword(password);
+
+        return convertEntityDtoMapper.convertEntityDto(userLogged);
+    }
+
+    private boolean isUserLoggedIn() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getPrincipal() != null;
     } 
+
+    private boolean matches(String rawPassword, String encodedPassword) {
+        return encoder.matches(rawPassword, encodedPassword);
+    }
+
+    private UserModel userLogged(){        
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedUserEmail = userDetails.getUsername();
+        UserModel userLogged = userRepository.findByEmail(loggedUserEmail);
+
+        return userLogged;
+    }
 }
