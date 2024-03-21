@@ -22,12 +22,18 @@ public class SecurityFilter extends OncePerRequestFilter{
     private TokenService tokenService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         var token = this.recoverToken(request);
         if(token != null){
+            if(tokenBlacklist.isBlacklisted(token)){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            } 
             var email = tokenService.validateToken(token);
             var user = userRepository.findByEmail(email);
 
@@ -42,4 +48,5 @@ public class SecurityFilter extends OncePerRequestFilter{
         if(authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
+
 }

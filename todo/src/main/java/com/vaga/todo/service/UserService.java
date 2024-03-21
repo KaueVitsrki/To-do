@@ -32,10 +32,6 @@ public class UserService {
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public static boolean matches(String rawPassword, String encodedPassword) {
-        return encoder.matches(rawPassword, encodedPassword);
-    }
-
     @Transactional
     public UserDto createUser(UserDto userDto){         
         if(userRepository.existsByEmail(userDto.getEmail())){
@@ -57,15 +53,11 @@ public class UserService {
             throw new UnauthorizedAccessException("Usuário não autenticado");
         }
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String loggedUserEmail = userDetails.getUsername();
-        UserModel userLogged = userRepository.findByEmail(loggedUserEmail);
+        boolean passwordMatch = matches(userDto.getPassword(), userLogged().getPassword());
+        boolean emailMatch = userDto.getEmail().equals(userLogged().getEmail());
 
-        boolean passwordMatch = matches(userDto.getPassword(), userLogged.getPassword());
-        boolean emailMatch = userDto.getEmail().equals(userLogged.getEmail());
-
-        if(userRepository.existsById(userLogged.getId()) && passwordMatch && emailMatch){
-            userRepository.deleteById(userLogged.getId());
+        if(userRepository.existsById(userLogged().getId()) && passwordMatch && emailMatch){
+            userRepository.deleteById(userLogged().getId());
         }else {
             throw new EntityNotFoundException("Não foi possível excluir a conta!");
         } 
@@ -81,12 +73,8 @@ public class UserService {
             throw new UnauthorizedAccessException("Usuário não autenticado");
         }
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String loggedUserEmail = userDetails.getUsername();
-        UserModel userLogged = userRepository.findByEmail(loggedUserEmail);
-
-        if(userRepository.existsById(userLogged.getId())){
-            UserModel user = userRepository.findById(userLogged.getId()).get();
+        if(userRepository.existsById(userLogged().getId())){
+            UserModel user = userRepository.findById(userLogged().getId()).get();
             return convertEntityDtoMapper.convertEntityDto(user);
         }else {
             throw new EntityNotFoundException("Não foi possível listar o usuário! O usuário não está cadastrado.");
@@ -99,23 +87,33 @@ public class UserService {
             throw new UnauthorizedAccessException("Usuário não autenticado");
         }
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String loggedUserEmail = userDetails.getUsername();
-        UserModel user = userRepository.findByEmail(loggedUserEmail);
-
-        if(userRepository.existsByEmail(userDto.getEmail()) && !userDto.getEmail().equals(user.getEmail())){
+        if(userRepository.existsByEmail(userDto.getEmail()) && !userDto.getEmail().equals(userLogged().getEmail())){
             throw new EmailAlreadyExistsException("Não foi possivel realizar a troca de Email! Este Email já foi cadastrado");
         }
 
+        UserModel userLogged = userLogged();
         String password = new BCryptPasswordEncoder().encode(userDto.getPassword());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(password);
 
-        return convertEntityDtoMapper.convertEntityDto(user);
+        userLogged.setEmail(userDto.getEmail());
+        userLogged.setPassword(password);
+
+        return convertEntityDtoMapper.convertEntityDto(userLogged);
     }
 
     private boolean isUserLoggedIn() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.getPrincipal() != null;
     } 
+
+    private boolean matches(String rawPassword, String encodedPassword) {
+        return encoder.matches(rawPassword, encodedPassword);
+    }
+
+    private UserModel userLogged(){        
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedUserEmail = userDetails.getUsername();
+        UserModel userLogged = userRepository.findByEmail(loggedUserEmail);
+
+        return userLogged;
+    }
 }
