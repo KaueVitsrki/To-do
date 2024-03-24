@@ -15,6 +15,7 @@ import com.vaga.todo.dto.TodoDto;
 import com.vaga.todo.exception.NameTodoAlreadyExistsException;
 import com.vaga.todo.exception.UnauthorizedAccessException;
 import com.vaga.todo.mapper.TodoConvertDtoEntityMapper;
+import com.vaga.todo.mapper.TodoConvertEntityDtoMapper;
 import com.vaga.todo.model.TodoModel;
 import com.vaga.todo.model.UserModel;
 import com.vaga.todo.repository.TodoRepository;
@@ -30,10 +31,12 @@ public class TodoService {
     @Autowired
     private TodoConvertDtoEntityMapper todoConvertDtoEntityMapper;
     @Autowired
+    private TodoConvertEntityDtoMapper todoConvertEntityDtoMapper;
+    @Autowired
     private UserRepository userRepository;
 
     @Transactional
-    public List<TodoDto> createTodo(TodoDto todoDto){
+    public TodoDto createTodo(TodoDto todoDto){
         if(!isUserLoggedIn()){
             throw new UnauthorizedAccessException("Usuário não autenticado");
         }
@@ -50,7 +53,7 @@ public class TodoService {
         userLogged.getTodoModel().add(todoModel);
         userRepository.save(userLogged);
 
-        return listTodoUser();
+        return todoConvertEntityDtoMapper.convertEntityDto(todoModel);
     }
 
     public List<TodoDto> listTodoUser(){
@@ -82,12 +85,9 @@ public class TodoService {
     }
 
     @Transactional
-    public List<TodoDto> updateTodo(UUID idTodo, TodoDto todoDto){
+    public TodoDto updateTodo(UUID idTodo, TodoDto todoDto){
         if(!isUserLoggedIn()){
             throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-        if(todoRepository.existsByName(todoDto.getName())){
-            throw new NameTodoAlreadyExistsException("Não foi possível atualizar a tarefa! Já existe uma tarefa com o mesmo nome.");
         }
 
         TodoModel todoModel = todoRepository.findById(idTodo)
@@ -95,8 +95,10 @@ public class TodoService {
 
         UserModel userLogged = userLogged();
         String nameTodoDto =  todoDto.getName();
-        boolean nameExist = userLogged.getTodoModel().stream().anyMatch(todo -> todo.getName().equals(nameTodoDto));
-
+        boolean nameExist = userLogged.getTodoModel()
+        .stream()
+        .anyMatch(todo -> todo.getName().equals(nameTodoDto) && !todo.getId().equals(todoDto.getId()));
+            
         if(nameExist){
             throw new NameTodoAlreadyExistsException("Não foi possível criar a tarefa! Já existe uma tarefa com o mesmo nome.");
         }
@@ -110,7 +112,7 @@ public class TodoService {
         todoRepository.save(todoModel);
         userRepository.save(userLogged);
 
-        return listTodoUser();
+        return todoConvertEntityDtoMapper.convertEntityDto(todoModel);
     }
 
     private UserModel userLogged(){        
