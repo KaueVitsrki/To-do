@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +27,14 @@ public class TodoController {
     private TodoService todoService;
     
     @PostMapping
-    public ResponseEntity<List<TodoDto>> createTodo(@RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> create = todoService.createTodo(todoDto);
-        return ResponseEntity.ok(create);
+    public ResponseEntity<TodoDto> createTodo(@RequestBody @Valid TodoDto todoDto){
+        TodoDto create = todoService.createTodo(todoDto);
+        return new ResponseEntity<TodoDto>(create, HttpStatus.CREATED);
     }
 
     @PutMapping("/{idTodo}")
-    public ResponseEntity<List<TodoDto>> updateTodo(@PathVariable UUID idTodo, @RequestBody @Valid TodoDto todoDto){
-        List<TodoDto> update = todoService.updateTodo(idTodo, todoDto);
+    public ResponseEntity<TodoDto> updateTodo(@PathVariable UUID idTodo, @RequestBody @Valid TodoDto todoDto){
+        TodoDto update = todoService.updateTodo(idTodo, todoDto);
         return ResponseEntity.ok(update);
     }
 
