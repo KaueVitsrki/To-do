@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vaga.todo.dto.UserDto;
-import com.vaga.todo.exception.EmailAlreadyExistsException;
 import com.vaga.todo.exception.UnauthorizedAccessException;
 import com.vaga.todo.mapper.UserConvertDtoEntityMapper;
 import com.vaga.todo.mapper.UserConvertEntityDtoMapper;
@@ -33,10 +32,7 @@ public class UserService {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Transactional
-    public UserDto createUser(UserDto userDto){         
-        if(userRepository.existsByEmail(userDto.getEmail())){
-             throw new EmailAlreadyExistsException("Não foi possível realizar o cadastro, pois o Email já foi cadastrado");
-        }
+    public UserDto createUser(UserDto userDto){      
 
         UserModel userConvert = convertDtoEntityMapper.convertDtoEntity(userDto);
         String password = new BCryptPasswordEncoder().encode(userConvert.getPassword());
@@ -85,10 +81,6 @@ public class UserService {
     public UserDto updateUser(UserDto userDto){
         if(!isUserLoggedIn()){
             throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-
-        if(userRepository.existsByEmail(userDto.getEmail()) && !userDto.getEmail().equals(userLogged().getEmail())){
-            throw new EmailAlreadyExistsException("Não foi possivel realizar a troca de Email! Este Email já foi cadastrado");
         }
 
         UserModel userLogged = userLogged();

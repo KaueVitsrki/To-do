@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -33,7 +34,7 @@ public class UserModel implements UserDetails{
     @GeneratedValue(strategy = GenerationType.UUID) 
     private UUID id;
 
-    @Email @NotBlank
+    @Email @NotBlank @Column(unique = true)
     private String email;
     
     @NotBlank
