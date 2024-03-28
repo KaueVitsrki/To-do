@@ -6,9 +6,11 @@ import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vaga.todo.dto.AuthenticationDto;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -79,4 +81,8 @@ public class UserModel implements UserDetails{
     public boolean isEnabled() {
         return true;
     }    
+
+    public boolean isLoginCorrect(AuthenticationDto authenticationDto, PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(authenticationDto.getPassword(), this.password);
+    }
 }

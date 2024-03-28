@@ -6,14 +6,11 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.vaga.todo.dto.TodoDto;
 import com.vaga.todo.exception.NameTodoAlreadyExistsException;
-import com.vaga.todo.exception.UnauthorizedAccessException;
 import com.vaga.todo.mapper.TodoConvertDtoEntityMapper;
 import com.vaga.todo.mapper.TodoConvertEntityDtoMapper;
 import com.vaga.todo.model.TodoModel;
@@ -36,11 +33,8 @@ public class TodoService {
     private UserRepository userRepository;
 
     @Transactional
-    public TodoDto createTodo(TodoDto todoDto){
-        if(!isUserLoggedIn()){
-            throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-        UserModel userLogged = userLogged();
+    public TodoDto createTodo(TodoDto todoDto, JwtAuthenticationToken token){
+        UserModel userLogged = userLogged(token);
         String nameTodoDto =  todoDto.getName();
         boolean nameExist = userLogged.getTodoModel().stream().anyMatch(todo -> todo.getName().equals(nameTodoDto));
 
@@ -56,11 +50,8 @@ public class TodoService {
         return todoConvertEntityDtoMapper.convertEntityDto(todoModel);
     }
 
-    public List<TodoDto> listTodoUser(){
-        if(!isUserLoggedIn()){
-            throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-        UserModel userLogged = userLogged();
+    public List<TodoDto> listTodoUser(JwtAuthenticationToken token){
+        UserModel userLogged = userLogged(token);
         List<TodoModel> list = userLogged.getTodoModel();
 
         list.sort(Comparator.comparing(TodoModel::getPriority).reversed().thenComparing(TodoModel::getName));
@@ -68,12 +59,8 @@ public class TodoService {
     }
 
     @Transactional
-    public void deleteTodoUser(UUID idTodo) {
-        if(!isUserLoggedIn()){
-            throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-        
-        UserModel userLogged = userLogged();
+    public void deleteTodoUser(UUID idTodo, JwtAuthenticationToken token) {
+        UserModel userLogged = userLogged(token);
 
         TodoModel todoToDelete = userLogged.getTodoModel().stream()
             .filter(todo -> todo.getId().equals(idTodo))
@@ -85,15 +72,11 @@ public class TodoService {
     }
 
     @Transactional
-    public TodoDto updateTodo(UUID idTodo, TodoDto todoDto){
-        if(!isUserLoggedIn()){
-            throw new UnauthorizedAccessException("Usuário não autenticado");
-        }
-
+    public TodoDto updateTodo(UUID idTodo, TodoDto todoDto, JwtAuthenticationToken token){
         TodoModel todoModel = todoRepository.findById(idTodo)
         .orElseThrow(() -> new EntityNotFoundException("Tarefa não encontrada com o ID" + idTodo)); 
 
-        UserModel userLogged = userLogged();
+        UserModel userLogged = userLogged(token);
         String nameTodoDto =  todoDto.getName();
         boolean nameExist = userLogged.getTodoModel()
         .stream()
@@ -108,24 +91,14 @@ public class TodoService {
         todoModel.setAccomplished(todoDto.isAccomplished());
         todoModel.setPriority(todoDto.getPriority());
         todoModel.setUser(userLogged);
-
         todoRepository.save(todoModel);
         userRepository.save(userLogged);
 
         return todoConvertEntityDtoMapper.convertEntityDto(todoModel);
     }
 
-    private UserModel userLogged(){        
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String loggedUserEmail = userDetails.getUsername();
-        UserModel userLogged = userRepository.findByEmail(loggedUserEmail);
-
-        return userLogged;
+    private UserModel userLogged(JwtAuthenticationToken token){        
+        return userRepository.findById(UUID.fromString(token.getName()))
+        .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
     }
-
-    private boolean isUserLoggedIn() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getPrincipal() != null;
-    }
-
 }
