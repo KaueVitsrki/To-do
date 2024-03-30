@@ -70,7 +70,6 @@ public class UserService {
     public UserDto updateUser(UserDto userDto, JwtAuthenticationToken token){
         UserModel userLogged = userLogged(token);
         String password = new BCryptPasswordEncoder().encode(userDto.getPassword());
-
         userLogged.setEmail(userDto.getEmail());
         userLogged.setPassword(password);
 

@@ -35,8 +35,7 @@ public class TodoService {
     @Transactional
     public TodoDto createTodo(TodoDto todoDto, JwtAuthenticationToken token){
         UserModel userLogged = userLogged(token);
-        String nameTodoDto =  todoDto.getName();
-        boolean nameExist = userLogged.getTodoModel().stream().anyMatch(todo -> todo.getName().equals(nameTodoDto));
+        boolean nameExist = userLogged.getTodoModel().stream().anyMatch(todo -> todo.getName().equals(todoDto.getName()));
 
         if(nameExist){
             throw new NameTodoAlreadyExistsException("Não foi possível criar a tarefa! Já existe uma tarefa com o mesmo nome.");
@@ -53,8 +52,8 @@ public class TodoService {
     public List<TodoDto> listTodoUser(JwtAuthenticationToken token){
         UserModel userLogged = userLogged(token);
         List<TodoModel> list = userLogged.getTodoModel();
-
         list.sort(Comparator.comparing(TodoModel::getPriority).reversed().thenComparing(TodoModel::getName));
+        
         return TodoDto.convert(list);
     }
 
