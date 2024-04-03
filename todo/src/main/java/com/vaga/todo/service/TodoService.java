@@ -40,6 +40,9 @@ public class TodoService {
         if(nameExist){
             throw new NameTodoAlreadyExistsException("Não foi possível criar a tarefa! Já existe uma tarefa com o mesmo nome.");
         }
+        if(todoDto.getId() != null){
+            throw new RuntimeException("Não foi possível criar a tarefa, não é aceito id como parâmetro");
+        }
         
         TodoModel todoModel = todoConvertDtoEntityMapper.convertDtoEntity(todoDto);
         todoModel.setUser(userLogged);
@@ -82,7 +85,10 @@ public class TodoService {
         .anyMatch(todo -> todo.getName().equals(nameTodoDto) && !todo.getId().equals(todoDto.getId()));
             
         if(nameExist){
-            throw new NameTodoAlreadyExistsException("Não foi possível criar a tarefa! Já existe uma tarefa com o mesmo nome.");
+            throw new NameTodoAlreadyExistsException("Não foi possível atualizar a tarefa! Já existe uma tarefa com o mesmo nome.");
+        }
+        if(todoDto.getId() != null){
+            throw new RuntimeException("Não foi possível criar a tarefa, não é aceito id como parâmetro");
         }
         
         todoModel.setName(todoDto.getName());

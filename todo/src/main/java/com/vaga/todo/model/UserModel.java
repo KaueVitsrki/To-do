@@ -33,7 +33,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor @NoArgsConstructor
 public class UserModel implements UserDetails{
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) 
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(unique = true) 
     private UUID id;
 
     @Email @NotBlank @Column(unique = true)
@@ -48,7 +49,7 @@ public class UserModel implements UserDetails{
     private List<TodoModel> todoModel;
 
     @Override 
-    public Collection<? extends GrantedAuthority> getAuthorities() { // Criar os metodos abaixo
+    public Collection<? extends GrantedAuthority> getAuthorities() { 
         return null;
     }
 

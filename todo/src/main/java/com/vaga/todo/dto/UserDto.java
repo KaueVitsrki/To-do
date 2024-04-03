@@ -1,7 +1,6 @@
 package com.vaga.todo.dto;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.vaga.todo.model.TodoModel;
@@ -14,13 +13,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor @NoArgsConstructor
 public class UserDto {
-    private UUID id;
     private String email;
     private String password;
     private List<TodoModel> todoModel;
 
     public UserDto(UserModel userModel) {
-        this.id = userModel.getId();
         this.email = userModel.getEmail();
         this.password = userModel.getPassword();
         this.todoModel = userModel.getTodoModel();
