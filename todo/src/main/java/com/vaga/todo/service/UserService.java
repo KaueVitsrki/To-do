@@ -1,7 +1,6 @@
 package com.vaga.todo.service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +49,6 @@ public class UserService {
         }else {
             throw new EntityNotFoundException("Não foi possível excluir a conta!");
         } 
-    }
-
-    public List<UserDto> listUser(){
-        List<UserModel> list = userRepository.findAll(); //Apagar
-        return UserDto.convert(list);
     }
 
     public UserDto listUserId(JwtAuthenticationToken token){

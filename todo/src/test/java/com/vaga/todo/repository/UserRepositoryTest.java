@@ -31,7 +31,8 @@ class UserRepositoryTest {
     void existsByEmailSuccess(){
         UUID id = UUID.fromString("3864f1c7-0a60-4a6e-a4b4-df8a3748ed61");
         List<TodoModel> todoModel = new ArrayList<>();
-        UserDto userInput1 = new UserDto(id, "example@gmail.com", "1234", todoModel);
+        UserModel userInput = new UserModel(id, "example@gmail.com", "1234", todoModel);
+        UserDto userInput1 = new UserDto(userInput);
         UserModel userModel = this.createUser(userInput1);
 
         when(userRepository.existsByEmail(userModel.getEmail())).thenReturn(true);
@@ -45,7 +46,8 @@ class UserRepositoryTest {
     void existsByEmailError(){
         UUID id = UUID.fromString("3864f1c7-0a60-4a6e-a4b4-df8a3748ed61");
         List<TodoModel> todoModel = new ArrayList<>();
-        UserDto userInput1 = new UserDto(id, "example@gmail.com", "1234", todoModel);
+        UserModel userInput = new UserModel(id, "example@gmail.com", "1234", todoModel);
+        UserDto userInput1 = new UserDto(userInput);
         UserModel userModel = this.createUser(userInput1);
 
         when(userRepository.existsByEmail(userModel.getEmail())).thenReturn(false);
@@ -59,7 +61,8 @@ class UserRepositoryTest {
     void findByEmailSuccess(){
         UUID id = UUID.fromString("3864f1c7-0a60-4a6e-a4b4-df8a3748ed61");
         List<TodoModel> todoModel = new ArrayList<>();
-        UserDto userInput1 = new UserDto(id, "example@gmail.com", "1234", todoModel);
+        UserModel userInput = new UserModel(id, "example@gmail.com", "1234", todoModel);
+        UserDto userInput1 = new UserDto(userInput);
         UserModel userModel = this.createUser(userInput1);
  
         when(userRepository.findByEmail(userInput1.getEmail())).thenReturn(Optional.of(userModel));
@@ -77,7 +80,8 @@ class UserRepositoryTest {
     void findByEmailError(){
         UUID id = UUID.fromString("3864f1c7-0a60-4a6e-a4b4-df8a3748ed61");
         List<TodoModel> todoModel = new ArrayList<>();
-        UserDto userInput1 = new UserDto(id, "example@gmail.com", "1234", todoModel);
+        UserModel userInput = new UserModel(id, "example@gmail.com", "1234", todoModel);
+        UserDto userInput1 = new UserDto(userInput);
         UserModel userModel = this.createUser(userInput1);
  
         when(userRepository.findByEmail(userModel.getEmail())).thenReturn(Optional.empty());
@@ -89,7 +93,6 @@ class UserRepositoryTest {
 
     private UserModel createUser(UserDto userDto) {
         UserModel userModel = new UserModel();
-        userModel.setId(userDto.getId());
         userModel.setEmail(userDto.getEmail());
         userModel.setPassword(userDto.getPassword());
         

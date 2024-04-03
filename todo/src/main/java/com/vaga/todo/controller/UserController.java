@@ -1,7 +1,5 @@
 package com.vaga.todo.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +22,6 @@ import jakarta.validation.Valid;
 public class UserController {
     @Autowired
     private UserService userService;
-
-    @GetMapping("/all")
-    public ResponseEntity<List<UserDto>> listUser(){
-        List<UserDto> list = userService.listUser();// apagar
-        return ResponseEntity.ok(list);
-    }
 
     @GetMapping
     public ResponseEntity<UserDto> listUserById(JwtAuthenticationToken token){
