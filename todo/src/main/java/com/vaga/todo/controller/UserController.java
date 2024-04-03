@@ -38,8 +38,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto userDto, JwtAuthenticationToken token){
-        UserDto userCreate = userService.createUser(userDto, token);
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto userDto){
+        UserDto userCreate = userService.createUser(userDto);
         return new ResponseEntity<UserDto>(userCreate, HttpStatus.CREATED);
     }
 

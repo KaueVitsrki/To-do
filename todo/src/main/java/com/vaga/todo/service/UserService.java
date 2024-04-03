@@ -30,7 +30,7 @@ public class UserService {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Transactional
-    public UserDto createUser(UserDto userDto, JwtAuthenticationToken token){       
+    public UserDto createUser(UserDto userDto){       
         UserModel userConvert = convertDtoEntityMapper.convertDtoEntity(userDto);
         String password = new BCryptPasswordEncoder().encode(userConvert.getPassword());
         userConvert.setPassword(password);
